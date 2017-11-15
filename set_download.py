@@ -15,6 +15,7 @@ curl_d1 = "curl -X GET --header 'Accept: application/json' 'https://isic-archive
 curl_d2 = "' -o details/"
 curl_d3 = ".json"
 for v in values:
-    #print(curl_1+v['_id']+curl_2+v['_id']+curl_3,file=f)
-    print(curl_d1+v['_id']+curl_d2+v['_id']+curl_d3,file=f)
+    _id = v['_id']
+    #print(curl_1+_id+curl_2+v_id+curl_3,file=f)
+    print(curl_d1+v_id+curl_d2+_id+curl_d3,file=f)
 
