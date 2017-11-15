@@ -19,7 +19,9 @@ for v in values:
     _id = v['_id']
     if not os.path.isfile('thumbs/'+_id+'.jpeg')\
      and not os.path.isfile('thumbs/benign/'+_id+'.jpeg')\
-     and not os.path.isfile('thumbs/malignant/'+_id+'.jpeg'):
+     and not os.path.isfile('thumbs/malignant/'+_id+'.jpeg')\
+     and not os.path.isfile('thumbs/test/benign/'+_id+'.jpeg')\
+     and not os.path.isfile('thumbs/test/malignant/'+_id+'.jpeg'):
         print(curl_1+_id+curl_2+_id+curl_3,file=f)
         print(curl_d1+_id+curl_d2+_id+curl_d3,file=f)
 
