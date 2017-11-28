@@ -1,0 +1,4 @@
+http://ec2-52-67-221-229.sa-east-1.compute.amazonaws.com:8000
+ssh -i ronnypetson_key_pair.pem ec2-user@ec2-52-67-221-229.sa-east-1.compute.amazonaws.com
+scp -i ronnypetson_key_pair.pem ec2-user@ec2-52-67-221-229.sa-east-1.compute.amazonaws.com:~/IMG_20171128_164316.jpg .
+
