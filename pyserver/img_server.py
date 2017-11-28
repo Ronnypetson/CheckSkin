@@ -24,9 +24,9 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         f = StringIO()
 
         if r:
-            f.write("<strong>Success:</strong>")
+            f.write("Success")
         else:
-            f.write("<strong>Failed:</strong>")
+            f.write("Failed")
 
         length = f.tell()
         f.seek(0)
@@ -41,36 +41,40 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def deal_post_data(self):
         print self.headers
         boundary = self.headers.plisttext.split("=")[1]
-        print 'Boundary %s' %boundary
+        #print 'Boundary %s' %boundary
         remainbytes = int(self.headers['content-length'])
-        print "Remain Bytes %s" %remainbytes
+        #print "Remain Bytes %s" %remainbytes
+        # 1
         line = self.rfile.readline()
         remainbytes -= len(line)
         if not boundary in line:
             return (False, "Content NOT begin with boundary")
+        # 2
         line = self.rfile.readline()
         remainbytes -= len(line)
         #fn = re.findall(r'Content-Disposition.*name="file"; filename="(.*)"', line)
         fn = re.findall(r'IMG_.*\.jpg',line)
-        print(fn)
         if not fn:
             return (False, "Can't find out file name...")
         path = self.translate_path(self.path)
         fn = os.path.join(path, fn[0])
-        line = self.rfile.readline()
-        remainbytes -= len(line)
-        line = self.rfile.readline()
-        remainbytes -= len(line)
+        # 3, 4
+        while line.strip():
+            line = self.rfile.readline()
+            remainbytes -= len(line)
+        #line = self.rfile.readline()
+        #remainbytes -= len(line)
+        #
         try:
             out = open(fn, 'wb')
         except IOError:
             return (False, "Can't create file to write, do you have permission to write?")
 
-        if line.strip():
-            preline = line
-        else:
-            preline = self.rfile.readline()
-        #remainbytes -= len(preline)
+        #if line.strip():
+        #    preline = line
+        #else:
+        preline = self.rfile.readline()
+        remainbytes -= len(preline)
         while remainbytes > 0:
             line = self.rfile.readline()
             remainbytes -= len(line)
