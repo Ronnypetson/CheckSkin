@@ -9,22 +9,32 @@ import cgi
 import shutil
 import mimetypes
 import re
+import tensorflow as tf
+import cv2
+import eval_model as em
 try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO
 
+img_dim = 50
 class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):    
     # Simple HTTP request handler with POST commands.
 
     def do_POST(self):
         """Serve a POST request."""
-        r, info = self.deal_post_data()
-        print r, info, "by: ", self.client_address
+        y_ = [[0.0, 0.0]]
+        y_, r, info = self.deal_post_data()
+        print y_, r, info, "by: ", self.client_address
         f = StringIO()
 
         if r:
-            f.write("Success")
+            res = ""
+            if y_[0][0] >= y_[0][1]:
+                res = "Nao foi detectada mancha maligna."
+            else:
+                res = "Procure um especialista."
+            f.write("Sucesso! Resultado: "+res)
         else:
             f.write("Failed")
 
@@ -48,14 +58,14 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         line = self.rfile.readline()
         remainbytes -= len(line)
         if not boundary in line:
-            return (False, "Content NOT begin with boundary")
+            return ([[0.0,0.0]], False, "Content NOT begin with boundary")
         # 2
         line = self.rfile.readline()
         remainbytes -= len(line)
         #fn = re.findall(r'Content-Disposition.*name="file"; filename="(.*)"', line)
         fn = re.findall(r'IMG_.*\.jpg',line)
         if not fn:
-            return (False, "Can't find out file name...")
+            return ([[0.0,0.0]], False, "Can't find out file name...")
         path = self.translate_path(self.path)
         fn = os.path.join(path, fn[0])
         # 3, 4
@@ -68,7 +78,7 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         try:
             out = open(fn, 'wb')
         except IOError:
-            return (False, "Can't create file to write, do you have permission to write?")
+            return ([[0.0,0.0]], False, "Can't create file to write, do you have permission to write?")
 
         #if line.strip():
         #    preline = line
@@ -84,11 +94,17 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     preline = preline[0:-1]
                 out.write(preline)
                 out.close()
-                return (True, "File '%s' upload success!" % fn)
+                img = cv2.imread(fn,0)
+                img = cv2.resize(img,(img_dim,img_dim))
+                img = img/255.0
+                t_x = []
+                t_x.append(img)
+                y_ = em.eval(t_x)
+                return (y_, True, "File '%s' upload success!" % fn)
             else:
                 out.write(preline)
                 preline = line
-        return (False, "Unexpect Ends of data.")
+        return ([[0.0,0.0]], False, "Unexpect Ends of data.")
 
     def translate_path(self, path):
         """Translate a /-separated PATH to the local filename syntax.

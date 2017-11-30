@@ -1,0 +1,2 @@
+model_checkpoint_path: "/checkpoint/conv_skin/16_5000_model.ckpt"
+all_model_checkpoint_paths: "/checkpoint/conv_skin/16_5000_model.ckpt"
